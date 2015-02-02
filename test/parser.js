@@ -139,6 +139,16 @@ describe('Parser', function(){
       comp( Parser.parse( ".func" ),
         [ { type: "ExpressionStatement", expression: { type: "MemberExpression", object: null } } ] );
     });
+    it( 'should parse chained assignments', function() { 
+      comp( Parser.parse( "a = b = c" ),
+        [ { type: "ExpressionStatement", expression: { type: "AssignmentExpression", left: { value: 'a' }, right: { type: 'AssignmentExpression', left: { value: 'b' }, right: { value: 'c' } } } } ] );
+    });
+    [ "=", "+=", "-=", "*=", "/=", "%=", "^=", "&=", "|=" ].forEach( function( op ) { 
+        it( 'should parse assignment operator ' + op, function() { 
+          comp( Parser.parse( "x " + op + " y" ),
+            [ { type: "ExpressionStatement", expression: { type: "AssignmentExpression", left: { value: 'x' }, right: { value: 'y' }, operator: op } } ] );
+        });
+    } );
     [ "+", "-", "*", "/", "%", "&", "|", "^", "in" ].forEach( function( op ) { 
         it( 'should parse binary operator ' + op, function() { 
           comp( Parser.parse( "x = y " + op + " z" ),
@@ -163,7 +173,7 @@ describe('Parser', function(){
             [ { type: "ExpressionStatement", expression: { type: "AssignmentExpression", right: { operator: op[1] } } } ] );
         });
     } );
-    [ "!", "-", "$", "$$" ].forEach( function( op ) { 
+    [ "!", "-", "~", "$", "$$" ].forEach( function( op ) { 
         it( 'should parse unary operator ' + op, function() { 
           comp( Parser.parse( "x =      " + op + " z" ),
             [ { type: "ExpressionStatement", expression: { type: "AssignmentExpression", right: { type: "UnaryExpression", operator: op } } } ] );
@@ -264,6 +274,23 @@ describe('Parser', function(){
     });
     it( 'should not allow using reserved words as declared variable names', function() { 
       ( function() { Parser.parse( "Integer switch = 123;" ); } ).should.throw();
+    });
+    it( 'should allow using variable type names as declared variable names', function() { 
+      comp( Parser.parse( "Integer CAPI = x" ),
+                [ { type: "VariableDeclaration", declarations: [ { type: "VariableDeclarator", name: { value: "CAPI" }, dataType: { value: "Integer" } } ] } ] );
+    });
+    it( 'should allow builtin types to be used as variable after declaring them as variable', function() { 
+      comp( Parser.parse( "Integer CAPI = 0; CAPI += 1" ),
+                [ { type: "VariableDeclaration", declarations: [ { type: "VariableDeclarator", name: { value: "CAPI" }, dataType: { value: "Integer" } } ] }, 
+                    { type: "ExpressionStatement", expression: { type: "AssignmentExpression", left: { value: 'CAPI', id: '(name)' } } } ] );
+    });
+    it( 'should not allow reserved words to be used out of place in expressions', function() { 
+        ( function() { Parser.parse( "x = switch + 1;" ); } ).should.throw();
+        ( function() { Parser.parse( "if( until ); x = 1; end" ); } ).should.not.throw();
+    } );
+    it( 'should allow type names alone on a line', function() { 
+      comp( Parser.parse( "Integer" ),
+                [ { type: "ExpressionStatement" } ] );
     });
     it( 'should parse variable declarations for all the builtin types', function() { 
         language_features.builtin_types.forEach( function(vType) { 
