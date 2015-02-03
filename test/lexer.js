@@ -1,6 +1,6 @@
 var assert = require("assert"),
     should = require("should"),
-    Lexer = require( '..' )().Lexer,
+    Lexer = require( '..' ).Lexer,
     compare = require( "../lib/compare" ),
     _ = require( "lodash" );
 

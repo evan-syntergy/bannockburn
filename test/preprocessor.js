@@ -1,10 +1,10 @@
 var assert = require("assert"),
     should = require("should"),
-    makeParser = require( '..' ),
+    Bannockburn = require( '..'),
     _ = require( "lodash" );
 
-var Lexer = makeParser.Lexer;
-var preprocessor = makeParser.preprocessor;
+var Lexer = Bannockburn.Lexer,
+    preprocessor = Bannockburn.preprocessor;
 
 function pre( src ) {
     // Init the lexer and read all the tokens into our token buffer.

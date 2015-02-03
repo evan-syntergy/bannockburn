@@ -1,6 +1,6 @@
 var assert = require("assert"),
     should = require("should"),
-    makeParser = require( '..' ),
+    makeParser = require( '..').Parser,
     language_features = require( '../lib/language_features' ),
     compare = require( "../lib/compare" );
 
@@ -92,7 +92,7 @@ describe('Parser', function(){
         [ { type: "IfStatement", 
             test: { type: 'RelationalExpression' }, 
             consequent: [{ type: 'ExpressionStatement' }], 
-            alternate: { type: 'IfStatement', id: "elseif" } 
+            alternate: { type: 'ElseifStatement', id: "elseif" }
         } ] );
     });
     it( 'should parse if/elseif/else statements', function() { 
@@ -100,7 +100,7 @@ describe('Parser', function(){
         [ { type: "IfStatement", 
             test: { type: 'RelationalExpression' }, 
             consequent: [{ type: 'ExpressionStatement' }], 
-            alternate: { type: 'IfStatement', id: "elseif", alternate: [{ type: 'ExpressionStatement' }] } 
+            alternate: { type: 'ElseifStatement', id: "elseif", alternate: [{ type: 'ExpressionStatement' }] }
         } ] );
     });
     it( 'should parse function calls', function() { 
