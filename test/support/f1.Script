@@ -1,0 +1,82 @@
+Object runner = $SyntergyCore.TestRunner
+
+Object ctx = runner.getContext( "html" )
+
+// Define test name; set context variable or value; make assertions
+
+ctx.test( "Two tests in a row" )
+	ctx.var( "Five", 5)
+		ctx.shouldnt.equal( 5 )._and.should.be.greaterThan( 4 )
+		ctx.shouldnt.be.greaterThan( 6 )
+		ctx.should.be.lessThanOrEqualTo( 4 )
+
+// Assertions and tests can be chained together or separate
+
+ctx.test( "Math check" ).val( "5 + 23 - 5", 5 + 23 - 5 ).should.equal( 23 )
+
+ctx.test( "Math check 2" )
+	ctx.val( "5 + 23 - 5", 5 + 23 - 5 )
+		ctx.should.equal( 23 )
+
+Assoc a, b
+a.ok = true
+a.x = Assoc.CreateAssoc()
+a.x.name = "Bob"
+a.x.( "first.name" ) = "Bob"
+a.x.last = Assoc.CreateAssoc()
+a.x.last.name = "Dobbs"
+a."multi.dot.value" = 2
+a.listval = { 1, 2, 3, 4 }
+a.friends = { "Jim", "Fred", "Steve", "Julie", "Maggie" }
+
+Assoc x1
+x1.Key = 1
+
+a.c = { 1, 2, x1 }
+
+b.ok = true
+b.x = Assoc.CreateAssoc()
+b.x.name = "Bob"
+b.x.( "first.name" ) = "Bob"
+b.x.last = Assoc.CreateAssoc()
+b.x.last.name = "Dobbs"
+b."multi.dot.value" = 2
+b.listval = { 1, 2, 3, 4 }
+b.friends = { "Jim", "Fred", "Steve", "Julie", "Maggie" }
+
+Assoc x2
+x2.key = 1
+
+b.c = { 1, 2, x2 }
+
+ctx.Test( "Test deep assoc comparison" )
+	ctx.var( "a", a ).should.equal( b )
+	ctx.shouldnt.be.exactly( b )
+
+ctx.test( "Test the Test" )
+	ctx.var( "a", a ).shouldnt.have.feature( 'not_a_feature' )
+
+		// test for properties or features (with optional value)
+		ctx.should.have.property( "ok", true )
+
+		// Test attributes (multiple dots can be used)
+		ctx.attr( 'x' ).should.be.type( Assoc.AssocType )
+		ctx.attr( 'x.name' ).should.equal( "Bob" )
+		ctx.attr( "x.first\.name" ).should.equal( "Bob" )
+		ctx.attr( "x.last.name" ).should.equal( "Dobbs" )
+		ctx.attr( "x.first.name" ).shouldnt.contain( "Test" )
+		ctx.attr( 'listval' ).should.contain( 1 )
+		ctx.attr( 'multi\.dot\.value' ).should.equal( 2 )
+		ctx.attr( 'listval' ).attr(2).should.be.greaterThanOrEqualTo( 2 )
+		ctx.values().contain( { "Jim", "Fred", "Steve", "Julie", "Maggie" } )
+		ctx.keys().equal( { "friends", "listval", "multi.dot.value", "ok", "x" } )
+
+// Test types
+
+ctx.test( "Test value types" )
+	ctx.var( "b", b ).should.be.type( Assoc.AssocType )
+		ctx.shouldnt.be.type( IntegerType )
+		ctx.should.be.type( ObjectType )
+
+ctx.Done()
+

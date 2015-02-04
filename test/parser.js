@@ -1,5 +1,6 @@
 var assert = require("assert"),
     should = require("should"),
+    fs = require( 'fs'),
     makeParser = require( '..').Parser,
     language_features = require( '../lib/language_features' ),
     compare = require( "../lib/compare" );
@@ -308,6 +309,10 @@ describe('Parser', function(){
         comp( P.parse( "dummy i = 23;" ),
             [ { type: "VariableDeclaration", declarations: [ { type: "VariableDeclarator", name: { value: "i" }, dataType: { value: 'dummy' }, init: { value: 23 } } ] } ] );
     });
+    it( 'should parse a longer script', function() {
+        var content = fs.readFileSync( './test/support/f1.Script', 'utf-8' );
+        comp( Parser.parse( content), [ { type: "VariableDeclaration" } ] );
+    } );
   })
 } );
   
