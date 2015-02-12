@@ -9,8 +9,7 @@
   "author": "Evan Wheeler",
   "license": "MIT",
   "dependencies": {
-    "lodash": "~2.4.1",
-    "clone": "~0.2.0"
+    "lodash": "~2.4.1"
   },
   "devDependencies": {
     "jshint": "~2.5.11",
