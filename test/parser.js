@@ -40,6 +40,17 @@ describe('Parser', function(){
             } ] 
         }] );
     });
+    it( 'should parse functions that use nodebug', function() { 
+      comp(  Parser.parse( "function nodebug Integer x(Integer y); return y+1; end" ),
+        [ { type: "FunctionDeclaration", 
+            name: "x", 
+            nodebug: true,
+            body: [ { 
+                    type: "ReturnStatement",
+                    argument: { type: "BinaryExpression" }
+            } ] 
+        }] );
+    });
     it( 'should parse c-style for loops', function() { 
       comp( Parser.parse( "for( i = 0; i < 10; i += 1 ); end;" ),
         [ { type: "ForCStyleStatement" } ] );
