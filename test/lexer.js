@@ -1,8 +1,8 @@
 var assert = require("assert"),
-    should = require("should"),
     Lexer = require( '..' ).Lexer,
     compare = require( "../lib/compare" ),
-    _ = require( "lodash" );
+    _ = require( "lodash" ),
+    should = require( 'should/as-function' );
 
 function lex( str ) { 
     var lex = new Lexer( str ), t, tokens = [];
@@ -32,96 +32,96 @@ describe('Lexer', function(){
     describe( "#getSource()", function() { 
         it('should get the current token and advance', function(){
             var lx = new Lexer( "this is a test" );
-            lx.getSource().should.equal( "this is a test" );
+            should( lx.getSource() ).equal( "this is a test" );
         } );
     } );
     describe( "#getWhitespace()", function() { 
         it('should keep track of contiguous spaces and tabs.', function(){
-            getWSVals( "this  is \t a test" ).should.eql( [ "  ", " \t ", " " ] );
+            should( getWSVals( "this  is \t a test" ) ).eql( [ "  ", " \t ", " " ] );
         });
         it('should keep track of line comments', function(){
-            getWSVals( "this//This is a test" ).should.eql( [ "//This is a test" ] );
+            should( getWSVals( "this//This is a test" ) ).eql( [ "//This is a test" ] );
         });
     } );
     describe( "#peek()", function() { 
         it('should return the current token without advancing', function(){
             var lx = new Lexer( "this is a test" );
-            lx.peek().should.have.property("value", "this" );
-            lx.peek().should.have.property("value", "this" );
-            lx.get().should.have.property("value", "this" );
-            lx.peek().should.have.property("value", "is" );
-            lx.peek().should.have.property("value", "is" );
+            should( lx.peek() ).have.property("value", "this" );
+            should( lx.peek() ).have.property("value", "this" );
+            should( lx.get() ).have.property("value", "this" );
+            should( lx.peek() ).have.property("value", "is" );
+            should( lx.peek() ).have.property("value", "is" );
         });
     } );    
     describe( "#readNextToken()", function() { 
         it('should remove whitespace', function(){
-            lexVals( " this is      a  test   " ).should.eql( [ "this", "is", "a", "test" ] );
+            should( lexVals( " this is      a  test   " ) ).eql( [ "this", "is", "a", "test" ] );
         });
         it('should remove single line comments', function(){
-            lexVals( " this is //     a  test   " ).should.eql( [ "this", "is", "\n" ] );
+            should( lexVals( " this is //     a  test   " )).eql( [ "this", "is", "\n" ] );
         });
         it('should remove single line block comments', function(){
-            lexVals( " this is /*     a  */ test   " ).should.eql( [ "this", "is", "test" ] );
+            should( lexVals( " this is /*     a  */ test   " )).eql( [ "this", "is", "test" ] );
         });
         it('should remove single line block comments with no body', function(){
-            lexVals( "//" ).should.eql( ['\n'] );
+            should( lexVals( "//" )).eql( ['\n'] );
         });
         it('should remove block comments with incomplete closure', function(){
-            lexVals( "/*" ).should.eql( [] );
+            should( lexVals( "/*" )).eql( [] );
         });
         it('should remove multi-line block comments', function(){
-            lexTypes( " this is /* here \n are some \r\n lines */ test   " ).should.eql( [ "name", "name", "(nl)", "name" ] );
+            should( lexTypes( " this is /* here \n are some \r\n lines */ test   " )).eql( [ "name", "name", "(nl)", "name" ] );
         });
         it('should remove newline after a continuation', function(){
-            lexVals( " this is \\\na test   " ).should.eql( [ "this", "is", "a", "test" ] );
+            should( lexVals( " this is \\\na test   " )).eql( [ "this", "is", "a", "test" ] );
         });
         it('should remove newline after a continuation and line comment', function(){
-            lexVals( " this is \\ // this is a test\na test   " ).should.eql( [ "this", "is", "a", "test" ] );
+            should( lexVals( " this is \\ // this is a test\na test   " )).eql( [ "this", "is", "a", "test" ] );
         });
         it('should remove newline after a continuation and single line block comment', function(){
-            lexVals( " this is \\ /* this is a test*/ \na test   " ).should.eql( [ "this", "is", "a", "test" ] );
+            should( lexVals( " this is \\ /* this is a test*/ \na test   " )).eql( [ "this", "is", "a", "test" ] );
         });
         it('should remove newline after a continuation and two line block comment', function(){
-            lexVals( " this is \\ /* this is \na test*/ a test   " ).should.eql( [ "this", "is", "a", "test" ] );
+            should( lexVals( " this is \\ /* this is \na test*/ a test   " )).eql( [ "this", "is", "a", "test" ] );
         });
         it('should remove only one newline after a continuation followed by a two or greater line block comment', function(){
-            lexVals( " this is \\ /* this \n is \n a test*/ a test   " ).should.eql( [ "this", "is", "", "a", "test" ] );
+            should( lexVals( " this is \\ /* this \n is \n a test*/ a test   " )).eql( [ "this", "is", "", "a", "test" ] );
         });
         it('should parse floating points numbers with leading decimal point', function() { 
-            lexVals( ".1" ).should.eql( [ ".1" ] ); 
-            lexVals( ".01" ).should.eql( [ ".01" ] ); 
-            lexVals( ".011" ).should.eql( [ ".011" ] ); 
+            should( lexVals( ".1" )).eql( [ ".1" ] ); 
+            should( lexVals( ".01" )).eql( [ ".01" ] ); 
+            should( lexVals( ".011" )).eql( [ ".011" ] ); 
         } );        
         it('should parse floating points numbers with trailing decimal point', function() { 
-            lexVals( "1." ).should.eql( [ "1" ] ); 
-            lexVals( "21." ).should.eql( [ "21" ] ); 
-            lexVals( "111." ).should.eql( [ "111" ] ); 
+            should( lexVals( "1." )).eql( [ "1" ] ); 
+            should( lexVals( "21." )).eql( [ "21" ] ); 
+            should( lexVals( "111." )).eql( [ "111" ] ); 
         } );        
         it('should parse floating points numbers', function() { 
-            lexVals( "9.0" ).should.eql( [ "9.0" ] ); 
-            lexVals( "19.0" ).should.eql( [ "19.0" ] ); 
-            lexVals( "198.992" ).should.eql( [ "198.992" ] ); 
-            lexVals( "0.992" ).should.eql( [ "0.992" ] ); 
+            should( lexVals( "9.0" )).eql( [ "9.0" ] ); 
+            should( lexVals( "19.0" )).eql( [ "19.0" ] ); 
+            should( lexVals( "198.992" )).eql( [ "198.992" ] ); 
+            should( lexVals( "0.992" )).eql( [ "0.992" ] ); 
         } );        
         it('should tokenize single quote strings', function(){
-            lexVals( "'t'  'te'     'tes'    'test' '' " ).should.eql( [ "t", "te", "tes", "test", "" ] );
-            lexTypes( "'t'  'te'     'tes'    'test' '' " ).should.eql( [ "string", "string", "string", "string", "string" ] );
+            should( lexVals( "'t'  'te'     'tes'    'test' '' " )).eql( [ "t", "te", "tes", "test", "" ] );
+            should( lexTypes( "'t'  'te'     'tes'    'test' '' " )).eql( [ "string", "string", "string", "string", "string" ] );
         });
         it('should tokenize double quote strings', function(){
-            lexVals( '"t"  "te"     "tes"   "test" "" ' ).should.eql( [ "t", "te", "tes", "test", "" ] );
-            lexTypes( '"t"  "te"     "tes"   "test" "" ' ).should.eql( [ "string", "string", "string", "string", "string" ] );
+            should( lexVals( '"t"  "te"     "tes"   "test" "" ' )).eql( [ "t", "te", "tes", "test", "" ] );
+            should( lexTypes( '"t"  "te"     "tes"   "test" "" ' )).eql( [ "string", "string", "string", "string", "string" ] );
         });
         it('should escape single quotes', function(){
-            lexVals( " 'cat''s name'   ''''\t '''The'''" ).should.eql( [ "cat's name", "'", "'The'" ] );
-            lexTypes( " 'cat''s name'   ''''\t '''The'''" ).should.eql( [ "string", "string", "string" ] );
+            should( lexVals( " 'cat''s name'   ''''\t '''The'''" )).eql( [ "cat's name", "'", "'The'" ] );
+            should( lexTypes( " 'cat''s name'   ''''\t '''The'''" )).eql( [ "string", "string", "string" ] );
         });
         it('should escape double quotes', function(){
-            lexVals( ' "cat""s name"\t """"\t """The"""' ).should.eql( [ 'cat"s name', '"', '"The"' ] );
-            lexTypes( ' "cat""s name"\t """"\t """The"""' ).should.eql( [ "string", "string", "string" ] );
+            should( lexVals( ' "cat""s name"\t """"\t """The"""' )).eql( [ 'cat"s name', '"', '"The"' ] );
+            should( lexTypes( ' "cat""s name"\t """"\t """The"""' )).eql( [ "string", "string", "string" ] );
         });
         it('should automatically fix ambiguous sequences of period/ellipsis tokens', function(){
-            lexVals( 'function x( .... );end;' ).should.eql( [ "function", "x", "(", "...", ")", ";","end",";" ] );
-            lexVals( 'function x( .. );end;' ).should.eql( [ "function", "x", "(", "...", ")", ";","end",";" ] );
+            should( lexVals( 'function x( .... );end;' )).eql( [ "function", "x", "(", "...", ")", ";","end",";" ] );
+            should( lexVals( 'function x( .. );end;' )).eql( [ "function", "x", "(", "...", ")", ";","end",";" ] );
         });
     } );
 } );

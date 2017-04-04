@@ -1,13 +1,13 @@
 var assert = require("assert"),
-    should = require("should"),
     fs = require( 'fs'),
     makeParser = require( '..').Parser,
     language_features = require( '../lib/language_features' ),
-    compare = require( "../lib/compare" );
-
+    compare = require( "../lib/compare" ),
+    should = require('should/as-function');
+    
 function comp( actual, expected ) { 
     if( compare( actual, expected ) === false ) { 
-        actual.should.eql( expected );
+        should(actual).eql( expected );
     }
 }
     
@@ -247,8 +247,8 @@ describe('Parser', function(){
         [ { type: "ReturnStatement", argument: { type: "ObjRefLiteral", value: "#F6230" } } ] );
     });
     it( 'should not allow object references to contain non-hex digits', function() { 
-      ( function() { 
-        Parser.parse( "return #F6Z30" ); } ).should.throw();
+      should( ( function() { 
+        Parser.parse( "return #F6Z30" ); } ) ).throw();
     });
     it( 'should parse xlates', function() { 
       comp( Parser.parse( "return [Object.Message]" ),
@@ -271,10 +271,10 @@ describe('Parser', function(){
         [ { type: "VariableDeclaration", declarations: [ { type: "VariableDeclarator", name: { value: "i" }, dataType: { value: 'Integer' }, init: { value: 1 } }, { type: "VariableDeclarator", name: { value: "j" },init: { value: 'i' }, dataType: { value: 'Integer' } } ] } ] );
     });
     it( 'should not allow using reserved words as variable names', function() { 
-      ( function() { Parser.parse( "switch = 123;" ); } ).should.throw();
+      should( function() { Parser.parse( "switch = 123;" ); } ).throw();
     });
     it( 'should not allow using reserved words as declared variable names', function() { 
-      ( function() { Parser.parse( "Integer switch = 123;" ); } ).should.throw();
+      should( function() { Parser.parse( "Integer switch = 123;" ); } ).throw();
     });
     it( 'should allow using variable type names as declared variable names', function() { 
       comp( Parser.parse( "Integer CAPI = x" ),
@@ -286,8 +286,8 @@ describe('Parser', function(){
                     { type: "ExpressionStatement", expression: { type: "AssignmentExpression", left: { value: 'CAPI', id: '(name)' } } } ] );
     });
     it( 'should not allow reserved words to be used out of place in expressions', function() { 
-        ( function() { Parser.parse( "x = switch + 1;" ); } ).should.throw();
-        ( function() { Parser.parse( "if( until ); x = 1; end" ); } ).should.not.throw();
+        should( function() { Parser.parse( "x = switch + 1;" ); } ).throw();
+        should( function() { Parser.parse( "if( until ); x = 1; end" ); } ).not.throw();
     } );
     it( 'should allow type names alone on a line', function() { 
       comp( Parser.parse( "Integer" ),
@@ -300,18 +300,85 @@ describe('Parser', function(){
         });
     } );
     it( 'should fail if declaring unknown variable types', function() { 
-        ( function() { 
+        should( function() { 
             Parser.parse( "dummy i = x" );
-        } ).should.throw();
+        } ).throw();
     } );
     it( 'should parse non-standard variable types if they are passed as additional types', function() { 
         var P = makeParser( { additional_types: [ 'Dummy' ] } );
         comp( P.parse( "dummy i = 23;" ),
             [ { type: "VariableDeclaration", declarations: [ { type: "VariableDeclarator", name: { value: "i" }, dataType: { value: 'dummy' }, init: { value: 23 } } ] } ] );
     });
+    it( "should parse chains of dots", function() { 
+        var P = makeParser();
+        comp( P.parse( 'ctx.var( "Five", 5).stuff.more()' ), [ {
+          arity: 'statement',
+          expression: {
+            arguments: [],
+            arity: 'binary',
+            callee: {
+              arity: 'binary',
+              computed: false,
+              loc: { end: { col: 29, line: 1 }, start: { col: 0, line: 1 } },
+              object: {
+                arity: 'binary',
+                computed: false,
+                loc: { end: { col: 24, line: 1 }, start: { col: 0, line: 1 } },
+                object: {
+                  arguments: [
+                    {
+                      arity: 'literal',
+                      value: 'Five'
+                    },
+                    {
+                      arity: 'literal',
+                      value: '5'
+                    }
+                  ],
+                  arity: 'binary',
+                  callee: {
+                    arity: 'binary',
+                    computed: false,
+                    loc: { end: { col: 6, line: 1 }, start: { col: 0, line: 1 } },
+                    object: {
+                      arity: 'name',
+                      value: 'ctx'
+                    },
+                    property: {
+                      arity: 'literal',
+                      value: 'var'
+                    },
+                    range: [ 0, 6 ],
+                    type: 'MemberExpression',
+                    value: '.'
+                  },
+                  type: 'CallExpression',
+                  value: '('
+                },
+                property: {
+                  arity: 'literal',
+                  value: 'stuff'
+                },
+                type: 'MemberExpression',
+                value: '.'
+              },
+              property: {
+                arity: 'literal',
+                value: 'more'
+              },
+              type: 'MemberExpression',
+              value: '.'
+            },
+            type: 'CallExpression',
+            value: '('
+          },
+          type: 'ExpressionStatement'
+        }] );
+    } );
     it( 'should parse a longer script', function() {
-        var content = fs.readFileSync( './test/support/f1.Script', 'utf-8' );
-        comp( Parser.parse( content), [ { type: "VariableDeclaration" } ] );
+        var content = fs.readFileSync( './test/support/f1.Script', 'utf-8' );        
+        var result = Parser.parse( content );
+        comp( result, [ { type: "VariableDeclaration" } ] );
     } );
   })
 } );

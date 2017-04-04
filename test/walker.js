@@ -1,5 +1,5 @@
 var Bannockburn = require( '..' ),
-    should = require( 'should' );
+    should = require('should/as-function');
 
 var parser = Bannockburn.Parser(),
     Walker = Bannockburn.Walker;

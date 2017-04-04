@@ -1,48 +1,48 @@
 var assert = require("assert"),
-    should = require("should"),
+    should = require( 'should/as-function' ),
     Macros = require( '../lib/macros' );
     
 describe('Macros', function(){
   describe('#define()', function(){
     it('should define macros', function(){
-      ( new Macros() ).define( "A", [ "B", "C" ] ).isDefined( "A" ).should.equal( true );
+      should( ( new Macros() ).define( "A", [ "B", "C" ] ).isDefined( "A" ) ).equal( true );
     });
     it( 'should work with a valueFn defined', function() { 
-       ( new Macros( { valueFn: function(v) { return v.value; } } ) )
+       should( ( new Macros( { valueFn: function(v) { return v.value; } } ) )
             .define( { value: "A" }, [ { value: "B" } ] )
-            .isDefined( { value: "A" } ).should.equal( true );
+            .isDefined( { value: "A" } ) ).equal( true );
     });
   })
   
   describe( "#undef()", function() { 
     it( "should remove defined macros", function() { 
-      ( new Macros() ).define( "A", [ "B", "C" ] ).undef( "A" ).isDefined( "A" ).should.equal( false );
+      should( ( new Macros() ).define( "A", [ "B", "C" ] ).undef( "A" ).isDefined( "A" ) ).equal( false );
     } );
     it( "should work with a valueFn defined", function() { 
-      ( new Macros( { valueFn: function(v) { return v.value; } } ) )
+      should( ( new Macros( { valueFn: function(v) { return v.value; } } ) )
             .define( { value: "A" }, [ { value: "B" } ] )
             .undef( { value: "A" } )
-            .isDefined( { value: "A" } ).should.equal( false );
+            .isDefined( { value: "A" } ) ).equal( false );
     } );
   } );
 
   describe( "#evaluate()", function() { 
     it( "should evaluate simple macros", function() { 
-      ( new Macros() ).define( "A", [ "B", "C" ] ).evaluate( "A" ).should.eql( [ "B", "C" ] );
+      should( ( new Macros() ).define( "A", [ "B", "C" ] ).evaluate( "A" )).eql( [ "B", "C" ] );
     } );
     it( "should evaluate deep macros", function() { 
-      ( new Macros() ).define( "A", [ "B", "C" ] ).define( "B", [ "D", "C" ] ).evaluate( "A" ).should.eql( [ "D", "C", "C" ] );
+      should( ( new Macros() ).define( "A", [ "B", "C" ] ).define( "B", [ "D", "C" ] ).evaluate( "A" ) ).eql( [ "D", "C", "C" ] );
     } );
     it( "should detect cycles in recursive macros", function() { 
-      ( function() { ( new Macros() ).define( "A", [ "B", "C" ] ).define( "B", [ "D", "C" ] ).define( "C", [ "A" ] ).evaluate( "A" ) } ).should.throw();
+      should( function() { ( new Macros() ).define( "A", [ "B", "C" ] ).define( "B", [ "D", "C" ] ).define( "C", [ "A" ] ).evaluate( "A" ) } ).throw();
     } );
     it( "should work with a valueFn defined", function() { 
-       ( new Macros( { valueFn: function(v) { return v.value; } } ) )
-            .define( { value: "A" }, [ { value:"B"}, {value:"C"} ] ).evaluate( {value:"A"} ).should.eql( [ {value:"B"}, {value:"C"} ] );
+       should( ( new Macros( { valueFn: function(v) { return v.value; } } ) )
+            .define( { value: "A" }, [ { value:"B"}, {value:"C"} ] ).evaluate( {value:"A"} ) ).eql( [ {value:"B"}, {value:"C"} ] );
     } );
     it( "should work with isEvalItem defined", function() { 
-       ( new Macros( { canEvalItem: function(v) { return v !== '+'; } } ) )
-            .define( "A", [ "B", "+", "C" ] ).define( "+", "D" ).evaluate( "A" ).should.eql( [ "B", "+", "C" ] );
+       should( ( new Macros( { canEvalItem: function(v) { return v !== '+'; } } ) )
+            .define( "A", [ "B", "+", "C" ] ).define( "+", "D" ).evaluate( "A" ) ).eql( [ "B", "+", "C" ] );
     } );
   } );
 })

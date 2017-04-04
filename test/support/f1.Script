@@ -5,8 +5,8 @@ Object ctx = runner.getContext( "html" )
 // Define test name; set context variable or value; make assertions
 
 ctx.test( "Two tests in a row" )
-	ctx.var( "Five", 5)
-		ctx.shouldnt.equal( 5 )._and.should.be.greaterThan( 4 )
+	ctx.var( "Five", 5).stuff()
+		ctx.shouldnt.equal( 5 )
 		ctx.shouldnt.be.greaterThan( 6 )
 		ctx.should.be.lessThanOrEqualTo( 4 )
 

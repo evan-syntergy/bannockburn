@@ -1,7 +1,7 @@
 var assert = require("assert"),
-    should = require("should"),
     Bannockburn = require( '..'),
-    _ = require( "lodash" );
+    _ = require( "lodash" ),
+    should = require('should/as-function');    
 
 var Lexer = Bannockburn.Lexer,
     preprocessor = Bannockburn.preprocessor;
@@ -24,65 +24,65 @@ function preVals( src ) {
     
 describe('Preprocessor', function(){
     it( "should remove unknown ifdefs", function() { 
-        preVals( "#ifdef TEST\na = 1\n#endif\nX" ).should.eql( [ "X" ] );
+        should( preVals( "#ifdef TEST\na = 1\n#endif\nX" ) ).eql( [ "X" ] );
     } );
     it( "should include alternates to unknown ifdefs", function() { 
-        preVals( "#ifdef TEST\na = 1\n#else\nX\n#endif" ).should.eql( [ "X", "\n" ] );
+        should( preVals( "#ifdef TEST\na = 1\n#else\nX\n#endif" ) ).eql( [ "X", "\n" ] );
     } );
     it( "should include unknown ifndefs", function() { 
-        preVals( "#ifndef TEST\na = 1\n#endif\nX" ).should.eql( [ "a", "=", "1", "\n", "X" ] );
+        should( preVals( "#ifndef TEST\na = 1\n#endif\nX" ) ).eql( [ "a", "=", "1", "\n", "X" ] );
     } );
     it( "should exclude alternates to unknown ifndefs", function() { 
-        preVals( "#ifndef TEST\na = 1\n#else\nX\n#endif" ).should.eql( [ "a", "=", "1", "\n" ] );
+        should( preVals( "#ifndef TEST\na = 1\n#else\nX\n#endif" ) ).eql( [ "a", "=", "1", "\n" ] );
     } );
     it( "should include known ifdefs", function() { 
-        preVals( "#define TEST\n#ifdef TEST\na = 1\n#endif" ).should.eql( [ "a", "=", "1", "\n" ] );
+        should( preVals( "#define TEST\n#ifdef TEST\na = 1\n#endif" ) ).eql( [ "a", "=", "1", "\n" ] );
     } );
     it( "should exclude known ifndefs", function() { 
-        preVals( "#define TEST\n#ifndef TEST\na = 1\n#endif" ).should.eql( [] );
+        should( preVals( "#define TEST\n#ifndef TEST\na = 1\n#endif" )).eql( [] );
     } );
     it( "should respect undefine after define", function() { 
-        preVals( "#define TEST 1\n#undef TEST\n#ifdef TEST\na = 1\n#endif" ).should.eql( [] );
+        should( preVals( "#define TEST 1\n#undef TEST\n#ifdef TEST\na = 1\n#endif" )).eql( [] );
     } );
     it( "should replace macros", function() { 
-        preVals( "#define TEST 123\nTEST" ).should.eql( ["123"] );
+        should( preVals( "#define TEST 123\nTEST" )).eql( ["123"] );
     } );
     it( "should replace macros within macros", function() { 
-        preVals( "#define TEST ASDF\n#Define ASDF 5551212\nTEST" ).should.eql( ["5551212"] );
+        should( preVals( "#define TEST ASDF\n#Define ASDF 5551212\nTEST" )).eql( ["5551212"] );
     } );
     it( "should prevent recursive macros", function() { 
-        ( function() { 
+        should( function() { 
             preVals( "#define TEST ASDF\n#Define ASDF AAA\n#define AAA TEST\nTEST" );
-        } ).should.throw();
+        } ).throw();
     } );
     it( "should not allow endif directives outside of if", function() { 
-        ( function() { 
+        should( function() { 
             preVals( "#ifdef TEST\n#endif\n#endif" );
-        } ).should.throw();
+        } ).throw();
     } );
     it( "should not allow else directives outside of if", function() { 
-        ( function() { 
+        should( function() { 
             preVals( "#ifdef TEST\n#endif\n#else" );
-        } ).should.throw();
+        } ).throw();
     } );
     it( "should not allow invalid directives", function() { 
-        ( function() { 
+        should( function() { 
             preVals( "#invalid TEST" );
-        } ).should.throw();
+        } ).throw();
     } );
     it( "should skip directives within excluded sections", function() { 
-        preVals( "#ifdef TEST\n#define X 23\n#endif\nX" ).should.eql( ["X"] );
+        should( preVals( "#ifdef TEST\n#define X 23\n#endif\nX" )).eql( ["X"] );
     } );
     it( "should skip invalid directives within excluded sections", function() { 
-        preVals( "#ifdef TEST\n#asdffdsa X 23\n#endif\nX" ).should.eql( ["X"] );
+        should( preVals( "#ifdef TEST\n#asdffdsa X 23\n#endif\nX" )).eql( ["X"] );
     } );
     it( "should skip non-name directives within excluded sections", function() { 
-        preVals( "#ifdef TEST\n#(2345 X 23\n#endif\nX" ).should.eql( ["X"] );
+        should( preVals( "#ifdef TEST\n#(2345 X 23\n#endif\nX" )).eql( ["X"] );
     } );
     it( "should not allow non-name directives in included sections", function() { 
-        ( function() { 
+        should( ( function() { 
             preVals( "#ifndef TEST\n#(2345 X 23\n#endif\nX" );
-        } ).should.throw();
+        } )).throw();
     } );
 } );
 
