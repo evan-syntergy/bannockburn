@@ -795,9 +795,7 @@ describe("Parser", function() {
       );
     });
     it("should parse a broken if statement", () => {
-      console.log(
-        stringify(Parser.parse("Function x( Object y ); if( 1 ) ; End"), null, 2)
-      );
+        should( function() { Parser.parse("Function x( Object y ); if( 1 ) ; End") } ).throw()
     });
   });
 });
