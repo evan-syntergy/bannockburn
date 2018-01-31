@@ -661,7 +661,7 @@ describe("Parser", function() {
           type: "ExpressionStatement",
           expression: {
             type: "AssignmentExpression",
-            left: { value: "CAPI", id: "(name)" }
+            left: { value: "CAPI", arity: "name" }
           }
         }
       ]);
