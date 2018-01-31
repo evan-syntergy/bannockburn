@@ -13,6 +13,7 @@ function comp(actual, expected) {
 }
 
 var Parser = makeParser();
+var StrictParser = makeParser({ strict: true });
 
 describe("Parser", function() {
   describe("#parse()", function() {
@@ -789,13 +790,32 @@ describe("Parser", function() {
       var result = Parser.parse(content);
       comp(result, [{ type: "VariableDeclaration" }]);
     });
+    it("should require variable assignment or declaration", () => {
+      should(function() {
+        console.log(
+          stringify(StrictParser.parse("String i; echo( i )"), null, 2)
+        );
+      }).not.throw();
+    });
     it("wants a sandwich", () => {
       console.log(
         stringify(Parser.parse("Function x( Object ); End;"), null, 2)
       );
     });
-    it("should parse a broken if statement", () => {
-        should( function() { Parser.parse("Function x( Object y ); if( 1 ) ; End") } ).throw()
+    it("should not parse a broken if statement", () => {
+      should(function() {
+        Parser.parse("Function x( Object y ); if( 1 ) ; End");
+      }).throw();
+    });
+    it("should parse global as function", () => {
+      should(function() {
+        console.log(stringify(Parser.parse("echo( $$(test) )"), null, 2));
+      }).not.throw();
+    });
+    it("should parse global as function", () => {
+      should(function() {
+        console.log(stringify(Parser.parse("echo( $$'test' )"), null, 2));
+      }).not.throw();
     });
   });
 });
