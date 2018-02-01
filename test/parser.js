@@ -4,11 +4,42 @@ var assert = require("assert"),
   language_features = require("../lib/language_features"),
   compare = require("../lib/compare"),
   should = require("should/as-function"),
-  stringify = require("json-stringify-safe");
+  stringify = require("json-stringify-safe"),
+  _ = require("lodash");
+
+function intersect(fullObj, partialObj) {
+  var i, key;
+
+  // allow conversions from arguments to array.
+  if (_.isArguments(fullObj)) {
+    fullObj = pSlice.call(fullObj);
+  }
+  if (_.isArguments(partialObj)) {
+    partialObj = pSlice.call(partialObj);
+  }
+
+  if (
+    _.isArray(fullObj) &&
+    _.isArray(partialObj) &&
+    fullObj.length >= partialObj.length
+  ) {
+    var newFullArray = [];
+    for (var i = 0; i < partialObj.length; i++) {
+      newFullArray.push(intersect(fullObj[i], partialObj[i]));
+    }
+    return newFullArray;
+  } else if (_.isObject(fullObj) && _.isObject(partialObj)) {
+    var newFullObj = _.pick(fullObj, _.keys(partialObj));
+
+    // descend.
+    return _.mapValues(newFullObj, (v, k) => intersect(v, partialObj[k]));
+  }
+  return fullObj;
+}
 
 function comp(actual, expected) {
   if (compare(actual, expected) === false) {
-    should(actual).eql(expected);
+    should(intersect(_.cloneDeep(actual), expected)).eql(expected);
   }
 }
 
@@ -792,30 +823,68 @@ describe("Parser", function() {
     });
     it("should require variable assignment or declaration", () => {
       should(function() {
-        console.log(
-          stringify(StrictParser.parse("String i; echo( i )"), null, 2)
-        );
+        StrictParser.parse("String i; echo( i )");
       }).not.throw();
     });
     it("wants a sandwich", () => {
-      console.log(
-        stringify(Parser.parse("Function x( Object ); End;"), null, 2)
-      );
+      Parser.parse("Function x( Object ); End;");
     });
     it("should not parse a broken if statement", () => {
       should(function() {
         Parser.parse("Function x( Object y ); if( 1 ) ; End");
       }).throw();
     });
-    it("should parse global as function", () => {
-      should(function() {
-        console.log(stringify(Parser.parse("echo( $$(test) )"), null, 2));
-      }).not.throw();
+    it("should require global function to evaulate as an expression", () => {
+      comp(Parser.parse("$$(test)"), [
+        {
+          type: "ExpressionStatement",
+          expression: {
+            value: "$$",
+            arity: "unary",
+            argument: {
+              value: "test",
+              arity: "name",
+              decl: false
+            },
+            type: "UnaryExpression",
+            operator: "$$"
+          }
+        }
+      ]);
     });
-    it("should parse global as function", () => {
-      should(function() {
-        console.log(stringify(Parser.parse("echo( $$'test' )"), null, 2));
-      }).not.throw();
+    it("should parse global as string", () => {
+      comp(Parser.parse("$$'test'"), [
+        {
+          type: "ExpressionStatement",
+          expression: {
+            value: "$$",
+            arity: "unary",
+            argument: {
+              value: "test",
+              arity: "literal"
+            },
+            type: "UnaryExpression",
+            operator: "$$"
+          }
+        }
+      ]);
+    });
+    it("should parse global as string", () => {
+      comp(Parser.parse("$$test"), [
+        {
+          type: "ExpressionStatement",
+          expression: {
+            value: "$$",
+            arity: "unary",
+            argument: {
+              value: "test",
+              arity: "literal"
+            },
+            type: "UnaryExpression",
+            operator: "$$"
+          }
+        }
+      ]);
     });
   });
 });
