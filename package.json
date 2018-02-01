@@ -9,7 +9,7 @@
   "author": "Evan Wheeler",
   "license": "MIT",
   "dependencies": {
-    "lodash": "~2.4.1"
+    "lodash": "latest"
   },
   "devDependencies": {
     "grunt": "~0.4.5",

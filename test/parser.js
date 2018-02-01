@@ -2,46 +2,10 @@ var assert = require("assert"),
   fs = require("fs"),
   makeParser = require("..").Parser,
   language_features = require("../lib/language_features"),
-  compare = require("../lib/compare"),
+  comp = require("./util").comp,
   should = require("should/as-function"),
   stringify = require("json-stringify-safe"),
   _ = require("lodash");
-
-function intersect(fullObj, partialObj) {
-  var i, key;
-
-  // allow conversions from arguments to array.
-  if (_.isArguments(fullObj)) {
-    fullObj = pSlice.call(fullObj);
-  }
-  if (_.isArguments(partialObj)) {
-    partialObj = pSlice.call(partialObj);
-  }
-
-  if (
-    _.isArray(fullObj) &&
-    _.isArray(partialObj) &&
-    fullObj.length >= partialObj.length
-  ) {
-    var newFullArray = [];
-    for (var i = 0; i < partialObj.length; i++) {
-      newFullArray.push(intersect(fullObj[i], partialObj[i]));
-    }
-    return newFullArray;
-  } else if (_.isObject(fullObj) && _.isObject(partialObj)) {
-    var newFullObj = _.pick(fullObj, _.keys(partialObj));
-
-    // descend.
-    return _.mapValues(newFullObj, (v, k) => intersect(v, partialObj[k]));
-  }
-  return fullObj;
-}
-
-function comp(actual, expected) {
-  if (compare(actual, expected) === false) {
-    should(intersect(_.cloneDeep(actual), expected)).eql(expected);
-  }
-}
 
 var Parser = makeParser();
 var StrictParser = makeParser({ strict: true });
@@ -73,7 +37,7 @@ describe("Parser", function() {
           name: "x",
           body: null,
           params: [
-            { dataType: "String", name: { value: "p1" } },
+            { dataType: { value: "String" }, name: { value: "p1" } },
             { name: { value: "p2" }, default: { value: "1" } }
           ]
         }
@@ -86,7 +50,7 @@ describe("Parser", function() {
           name: "x",
           body: null,
           params: [
-            { dataType: "String", name: { value: "p1" } },
+            { dataType: { value: "String" }, name: { value: "p1" } },
             { name: { value: "p2" }, default: { value: "1" } },
             { id: "..." }
           ]
@@ -554,7 +518,7 @@ describe("Parser", function() {
     });
     it("should parse gotos", function() {
       comp(Parser.parse("goto label"), [
-        { type: "GotoStatement", argument: "label" }
+        { type: "GotoStatement", argument: { value: "label" } }
       ]);
     });
     it("should parse object references (starting with number)", function() {
