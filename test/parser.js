@@ -667,7 +667,7 @@ describe("Parser", function() {
       }).throw();
       should(function() {
         Parser.parse("if( until ); x = 1; end");
-      }).not.throw();
+      }).throw();
     });
     it("should allow type names alone on a line", function() {
       comp(Parser.parse("Integer"), [{ type: "ExpressionStatement" }]);
