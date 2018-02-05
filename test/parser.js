@@ -104,6 +104,23 @@ describe("Parser", function() {
         { type: "ForStatement" }
       ]);
     });
+    it("should parse for loops with increment", function() {
+      comp(Parser.parse("\n for i = 0 to 100 by 3*2-1\n end\n"), [
+        {
+          type: "ForStatement",
+          increment: {
+            value: "-",
+            id: "-",
+            left: {
+              id: "*",
+              left: { value: 3 },
+              right: { value: 2 }
+            },
+            right: { value: 1 }
+          }
+        }
+      ]);
+    });
     it("should parse repeat loops", function() {
       comp(Parser.parse("repeat; i = i + 1; until( i > 10 );"), [
         { type: "RepeatStatement" }
