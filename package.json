@@ -1,10 +1,11 @@
 {
   "name": "bannockburn",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec --bail --check-leaks test/",
-    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/"
+    "test-cov":
+      "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/"
   },
   "author": "Evan Wheeler",
   "license": "MIT",
