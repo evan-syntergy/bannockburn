@@ -4,6 +4,34 @@ var Bannockburn = require(".."),
 var parser = Bannockburn.Parser(),
   Walker = Bannockburn.Walker;
 
+var scratch = `function void scratch()
+                String	filePath = "C:\\temp\\_SubclassExecute\\"
+                Object 	tWriter
+                File	outFile
+                String	fileName
+                String	src
+
+                for tWriter in $Replicator.XMLTableWriterSubsystem.GetItems()
+
+                    if OS.FeatureInfo(tWriter.OSParent, "_SubclassPreExecute")[5]
+                        src = Compiler.Source(tWriter._SubclassPreExecute)
+                        
+                        
+                        fileName = filePath + tWriter.OSParent.OSNAME + ".txt"
+                        outFile = File.Open( fileName, File.WriteMode )
+                        if IsUndefined( outFile )
+                            echo( "### Error opening ", fileName, " for output" )
+                        else
+                            outFile.pLineTermination = ""
+                            File.Write( outFile, src )
+                            File.Close( outFile )						
+                        end	
+                    
+                    end
+                    
+                end	
+            end`;
+
 describe("Walker", function() {
   describe("#on()", function() {
     it("event handlers should be called", function(done) {
@@ -20,9 +48,12 @@ describe("Walker", function() {
     it("event handlers should be called", function(done) {
       new Walker()
         .on("before:VariableDeclarator.init", function(node) {
+          if (node.init[0].value !== "C:\\temp\\_SubclassExecute\\") {
+            throw new Error("Wrong node init value");
+          }
           done();
         })
-        .start(parser.parse("function x(); String s = 'asdf' + 'fdsa'; end"));
+        .start(parser.parse(scratch));
     });
   });
 });
