@@ -9,5 +9,17 @@ module.exports = {
 /*
 var b = module.exports;
 var p = b.Parser();
-p.parse("// tag:name of tag\nfunction f(); end;\n");
+p.parse(`
+    // tag:name of tag
+    function f()
+        Integer i
+        for( i = 0; i < 10; i++)
+            // tag:sqlnocheck
+            echo( "This is what i equals right now: ", \
+                Str.Format("%1", i ), \
+                " or raw: " + Str.String( i ) \
+                )
+        end
+    End
+`);
 */
